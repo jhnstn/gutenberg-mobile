@@ -19,6 +19,7 @@ commands:
           paths:
             - ~/.npm
             - i18n-cache/data
+            - node_modules
   npm-install-full:
     steps:
       - restore_cache:
