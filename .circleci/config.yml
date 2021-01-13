@@ -12,7 +12,7 @@ commands:
             - npm-i18n-v4-cache-v{{ .Environment.CACHE_TRIGGER_VERSION }}-job-{{ .Environment.CIRCLE_JOB }}-{{ checksum "package-lock.json" }}-mokagio
       - run:
           name: NPM Install
-          command: npm ci --prefer-offline
+          command: npm install
       - save_cache:
           name: Save NPM Cache
           key: npm-i18n-v4-cache-v{{ .Environment.CACHE_TRIGGER_VERSION }}-job-{{ .Environment.CIRCLE_JOB }}-{{ checksum "package-lock.json" }}-mokagio
