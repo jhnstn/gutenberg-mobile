@@ -44,28 +44,18 @@ commands:
         - run:
             name: Create reports directory
             command: mkdir reports && mkdir reports/test-results
-  save-gutenberg-bundle-cache:
+  cache-react-native-bridge-bundle:
     steps:
-      - run:
-          name: Save Gutenberg-Mobile Submodule Hash
-          command: |
-            git rev-parse @:./libs/gutenberg-mobile > gutenberg_submodule_hash
-            cat gutenberg_submodule_hash
       - save_cache:
-          name: Cache JS Bundle
-          key: android-js-bundle-{{ checksum "gutenberg_submodule_hash" }}
+          name: Cache React Native Android Bridge Js Bundle
+          key: android-js-bundle-{{ checksum "$CIRCLE_SHA1" }}
           paths:
-            - libs/gutenberg-mobile/gutenberg/packages/react-native-bridge/android/build/assets/index.android.bundle
-  restore-gutenberg-bundle-cache:
+            - gutenberg/packages/react-native-bridge/android/build/assets/index.android.bundle
+  restore-cached-react-native-bridge-bundle:
     steps:
-      - run:
-          name: Save Gutenberg-Mobile Submodule Hash
-          command: |
-            git rev-parse @:./libs/gutenberg-mobile > gutenberg_submodule_hash
-            cat gutenberg_submodule_hash
       - restore_cache:
-          name: Restore JS Bundle From Cache
-          key: android-js-bundle-{{ checksum "gutenberg_submodule_hash" }}
+          name: Restore React Native Android Bridge Js Bundle from cache
+          key: android-js-bundle-{{ checksum "$CIRCLE_SHA1" }}
 
 parameters:
   android-docker-image:
@@ -288,20 +278,17 @@ jobs:
           command: npm run bundle:android
           environment:
             NODE_OPTIONS: --max_old_space_size=4096
-      # This is just a check, remove this once sure it works
-      - run:
-          name: Double check file exists
-          command: test -f bundle/android/App.js
+      # Move the generated bundle to the location where we'll need it for the
+      # Gradle build, then put it in the CI cache. We'll get it from there in
+      # the publishing job, which runs on a Docker container optimized for
+      # Android work.
       - run:
           name: Ensure assets folder exists
           command: mkdir -p gutenberg/packages/react-native-bridge/android/build/assets
       - run:
           name: Move bundle to assets folder
           command: mv bundle/android/App.js gutenberg/packages/react-native-bridge/android/build/assets/index.android.bundle
-      - run:
-          name: Double check file exists in Gutenberg
-          command: test -f gutenberg/packages/react-native-bridge/android/build/assets/index.android.bundle
-      - save-gutenberg-bundle-cache
+      - cache-react-native-bridge-bundle
 
   android-publish-react-native-bridge:
     docker:
@@ -309,7 +296,7 @@ jobs:
     steps:
       - checkout
       - checkout-submodules
-      - restore-gutenberg-bundle-cache
+      - restore-cached-react-native-bridge-bundle
       - run:
           name: Build React Native Bridge & Upload to Bintray
           command: |
