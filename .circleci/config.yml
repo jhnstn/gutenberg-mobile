@@ -260,7 +260,6 @@ jobs:
     steps:
       - checkout
       - checkout-submodules
-      - npm-install
       - run:
           name: Build React Native Bridge & Upload to Bintray
           command: |
