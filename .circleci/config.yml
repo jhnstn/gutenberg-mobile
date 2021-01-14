@@ -44,6 +44,28 @@ commands:
         - run:
             name: Create reports directory
             command: mkdir reports && mkdir reports/test-results
+  save-gutenberg-bundle-cache:
+    steps:
+      - run:
+          name: Save Gutenberg-Mobile Submodule Hash
+          command: |
+            git rev-parse @:./libs/gutenberg-mobile > gutenberg_submodule_hash
+            cat gutenberg_submodule_hash
+      - save_cache:
+          name: Cache JS Bundle
+          key: android-js-bundle-{{ checksum "gutenberg_submodule_hash" }}
+          paths:
+            - libs/gutenberg-mobile/gutenberg/packages/react-native-bridge/android/build/assets/index.android.bundle
+  restore-gutenberg-bundle-cache:
+    steps:
+      - run:
+          name: Save Gutenberg-Mobile Submodule Hash
+          command: |
+            git rev-parse @:./libs/gutenberg-mobile > gutenberg_submodule_hash
+            cat gutenberg_submodule_hash
+      - restore_cache:
+          name: Restore JS Bundle From Cache
+          key: android-js-bundle-{{ checksum "gutenberg_submodule_hash" }}
 
 parameters:
   android-docker-image:
@@ -254,9 +276,9 @@ jobs:
                 include_project_field: false
                 failure_message: ':red_circle: Scheduled tests failed on iOS device!'
 
-  android-publish-react-native-bridge:
+  android-build-react-native-bridge:
     docker:
-    - image: << pipeline.parameters.android-docker-image >>
+      - image: circleci/node:10
     steps:
       - checkout
       - checkout-submodules
@@ -279,6 +301,15 @@ jobs:
       - run:
           name: Double check file exists in Gutenberg
           command: test -f gutenberg/packages/react-native-bridge/android/build/assets/index.android.bundle
+      - save-gutenberg-bundle-cache
+
+  android-publish-react-native-bridge:
+    docker:
+    - image: << pipeline.parameters.android-docker-image >>
+    steps:
+      - checkout
+      - checkout-submodules
+      - restore-gutenberg-bundle-cache
       - run:
           name: Build React Native Bridge & Upload to Bintray
           command: |
@@ -352,8 +383,10 @@ jobs:
 workflows:
   android-publish-react-native-bridge:
     jobs:
+      - android-build-react-native-bridge
       - android-publish-react-native-bridge:
-          name: Android Publish React Native Bridge to Bintray
+          requires:
+            - android-build-react-native-bridge
 
   # gutenberg-mobile:
   #   jobs:
