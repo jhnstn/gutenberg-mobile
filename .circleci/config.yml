@@ -264,6 +264,19 @@ jobs:
       - run:
           name: Build Js Bundle
           command: npm run bundle:android
+      # This is just a check, remove this once sure it works
+      - run:
+          name: Double check file exists
+          command: test -f bundle/android/App.js
+      - run:
+          name: Ensure assets folder exists
+          command: mkdir -p gutenberg/packages/react-native-bridge/android/build/assets
+      - run:
+          name: Move bundle to assets folder
+          command: mv bundle/android/App.js gutenberg/packages/react-native-bridge/android/build/assets/index.android.bundle
+      - run:
+          name: Double check file exists in Gutenberg
+          command: test -f gutenberg/packages/react-native-bridge/android/build/assets/index.android.bundle
       #- run:
       #    name: Build React Native Bridge & Upload to Bintray
       #    command: |
