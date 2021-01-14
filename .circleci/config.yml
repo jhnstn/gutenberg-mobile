@@ -284,12 +284,12 @@ jobs:
               PREFIX="$CIRCLE_SHA1-ci-test"
             fi
 
-            echo $PREFIX
-
             ./gradlew \
               generatePomFileForGutenbergMobilePublicationPublication \
               bintrayUpload \
-              -PbintrayVersion=$PREFIX
+              -PbintrayVersion=$PREFIX \
+              -PbintrayUser=$BINTRAY_USER_ALT \
+              -PbintrayKey=$BINTRAY_KEY_ALT
 
   android-bintray-publish:
     # parameters:
