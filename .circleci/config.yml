@@ -327,6 +327,9 @@ jobs:
               -PbintrayKey=$BINTRAY_KEY_ALT \
               -PforceBuildJsBundle=true \
               -PisBundleUpToDate=false
+          environment:
+            JAVA_OPTS: -Xms512m -Xmx2g
+            GRADLE_OPTS: -Xmx3g -Dorg.gradle.daemon=false -Dorg.gradle.jvmargs="-Xmx2g -XX:+HeapDumpOnOutOfMemoryError"
 
 workflows:
   android-publish-react-native-bridge:
