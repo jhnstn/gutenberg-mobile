@@ -46,16 +46,26 @@ commands:
             command: mkdir reports && mkdir reports/test-results
   cache-react-native-bridge-bundle:
     steps:
+      - run:
+          name: Get cache id
+          command: |
+            echo $CIRCLE_SHA1 > cache_id
+            cat cache_id
       - save_cache:
           name: Cache React Native Android Bridge Js Bundle
-          key: android-js-bundle-{{ checksum "$CIRCLE_SHA1" }}
+          key: android-js-bundle-{{ checksum "cache_id" }}
           paths:
             - gutenberg/packages/react-native-bridge/android/build/assets/index.android.bundle
   restore-cached-react-native-bridge-bundle:
     steps:
+      - run:
+          name: Get cache id
+          command: |
+            echo $CIRCLE_SHA1 > cache_id
+            cat cache_id
       - restore_cache:
           name: Restore React Native Android Bridge Js Bundle from cache
-          key: android-js-bundle-{{ checksum "$CIRCLE_SHA1" }}
+          key: android-js-bundle-{{ checksum "cache_id" }}
 
 parameters:
   android-docker-image:
