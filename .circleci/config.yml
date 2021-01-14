@@ -254,7 +254,7 @@ jobs:
                 include_project_field: false
                 failure_message: ':red_circle: Scheduled tests failed on iOS device!'
 
-  android-bintray-replica:
+  android-bintray-publish:
     docker:
     - image: << pipeline.parameters.android-docker-image >>
     steps:
@@ -262,74 +262,9 @@ jobs:
       - checkout-submodules
       - npm-install
       - run:
-          name: Run React Native task
+          name: Build React Native Bridge & Upload to Bintray
           command: |
             cd gutenberg/packages/react-native-bridge/android
-            ./gradlew assembleRelease
-
-            branch=$CIRCLE_BRANCH
-            if [[ -n "$CIRCLE_PULL_REQUEST" ]]; then
-              PR_NUMBER=$(basename $CIRCLE_PULL_REQUEST)
-              # Making the assumption that $CIRCLE_SHA1 will always be
-              # available.
-              PREFIX="$PR_NUMBER-$CIRCLE_SHA1"
-            elif [[ "$branch" != "trunk" && "$branch" != "develop" ]]; then
-              # This happens on the first push of a new branch, when there
-              # isn't a PR open for it yet.
-              echo "[IGNORED] Running on a feature branch with no open PR: skipping Bintray upload"
-              # exit 0
-              PREFIX="$CIRCLE_SHA1-ci-test"
-            fi
-
-            ./gradlew \
-              generatePomFileForGutenbergMobilePublicationPublication \
-              bintrayUpload \
-              -PbintrayVersion=$PREFIX \
-              -PbintrayUser=$BINTRAY_USER_ALT \
-              -PbintrayKey=$BINTRAY_KEY_ALT
-
-  android-bintray-publish:
-    # parameters:
-    #   post-to-slack:
-    #     description: Post to Slack when tests fail. SLACK_WEBHOOK ENV variable must be set.
-    #     type: boolean
-    #     default: false
-    docker:
-    - image: << pipeline.parameters.android-docker-image >>
-    steps:
-      - checkout
-      - checkout-submodules
-      - npm-install
-      # I'd expect this to work, but it fails with:
-      #
-      # ./gradlew: No such file or directory
-      #
-      # https://app.circleci.com/pipelines/github/wordpress-mobile/gutenberg-mobile/9718/workflows/a4652147-ed0d-4fdb-b910-f045c06b89dd/jobs/51517
-      # - run:
-      #     name: cd to the React Native Android Bridge folder
-      #     command: cd gutenberg/packages/react-native-editor/android
-      # - android/publish-to-bintray
-      - run:
-          name: Upload Android bridge to Bintray
-          environment:
-            JAVA_OPTS: -Xms512m -Xmx2g
-            GRADLE_OPTS: -Xmx3g -Dorg.gradle.workers.max=1 -Dorg.gradle.daemon=false -Dkotlin.compiler.execution.strategy=in-process -Dorg.gradle.jvmargs="-Xmx2g -XX:+HeapDumpOnOutOfMemoryError"
-            NODE_OPTIONS: --max_old_space_size=2048
-          command: |
-            cd gutenberg/packages/react-native-editor/android
-
-            # Configure memory for Gradle task, it needs more than the default
-            #
-            # See discussion at:
-            # https://github.com/wordpress-mobile/gutenberg-mobile/issues/2972
-            #
-            # These values come from:
-            # https://stackoverflow.com/a/56027775/809944
-
-            cat gradle.properties
-            echo $GRADLE_OPTS
-            echo $JAVA_OPTS
-            echo $NODE_OPTIONS
 
             # Use a different versioning style for builds from PRs to allow
             # developers to iterate faster.
@@ -349,8 +284,9 @@ jobs:
             elif [[ "$branch" != "trunk" && "$branch" != "develop" ]]; then
               # This happens on the first push of a new branch, when there
               # isn't a PR open for it yet.
-              echo "Running on a feature branch with no open PR: skipping Bintray upload"
-              exit 0
+              echo "[IGNORED] Running on a feature branch with no open PR: skipping Bintray upload"
+              # exit 0
+              PREFIX="$CIRCLE_SHA1-ci-test"
             fi
 
             # Because we have Gradle's configure-on-demand option set to true,
@@ -381,18 +317,19 @@ jobs:
             #
             # See:
             # https://app.circleci.com/pipelines/github/wordpress-mobile/WordPress-Utils-Android/165/workflows/b0cb954f-315d-4c54-99a7-c36d11eec5c8/jobs/342
-            ./gradlew --stacktrace assembleRelease
+            ./gradlew assembleRelease
 
-            ./gradlew --stacktrace \
+            ./gradlew \
               generatePomFileForGutenbergMobilePublicationPublication \
               bintrayUpload \
-              -PbintrayVersion=$PREFIX
+              -PbintrayVersion=$PREFIX \
+              -PbintrayUser=$BINTRAY_USER_ALT \
+              -PbintrayKey=$BINTRAY_KEY_ALT
 
 workflows:
   bintray-publish-test:
     jobs:
-      - android-bintray-replica
-      # - android-bintray-publish
+      - android-bintray-publish
   # gutenberg-mobile:
   #   jobs:
   #     - checks:
