@@ -325,6 +325,7 @@ jobs:
               -PbintrayVersion=$PREFIX \
               -PbintrayUser=$BINTRAY_USER_ALT \
               -PbintrayKey=$BINTRAY_KEY_ALT \
+              -PforceBuildJsBundle=true \
               -PisBundleUpToDate=false
 
 workflows:
