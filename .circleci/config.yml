@@ -264,6 +264,8 @@ jobs:
       - run:
           name: Build Js Bundle
           command: npm run bundle:android
+          environment:
+            NODE_OPTIONS: --max_old_space_size=4096
       # This is just a check, remove this once sure it works
       - run:
           name: Double check file exists
