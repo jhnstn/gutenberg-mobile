@@ -282,7 +282,7 @@ jobs:
     steps:
       - checkout
       - checkout-submodules
-      - npm-install-full
+      - npm-install
       - run:
           name: Build Js Bundle
           command: npm run bundle:android
