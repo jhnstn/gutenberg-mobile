@@ -364,9 +364,7 @@ jobs:
             ./gradlew \
               generatePomFileForGutenbergMobilePublicationPublication \
               bintrayUpload \
-              -PbintrayVersion=$PREFIX \
-              -PbintrayUser=$BINTRAY_USER_ALT \
-              -PbintrayKey=$BINTRAY_KEY_ALT
+              -PbintrayVersion=$PREFIX
 
 workflows:
   gutenberg-mobile:
