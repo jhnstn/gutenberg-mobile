@@ -270,7 +270,7 @@ jobs:
             # See:
             #
             # - https://app.circleci.com/pipelines/github/wordpress-mobile/gutenberg-mobile/10073/workflows/b8eb0104-c426-4208-b077-00caac394a62/jobs/53247
-            echo "module.exports = { maxWorkers: 2 };" > gutenberg/packages/react-native-bridge/metro.config.js
+            echo "module.exports = { maxWorkers: 2 };" > ./gutenberg/packages/react-native-bridge/metro.config.js
 
             npm run bundle:android
           # This command may take a long time, so prevent CircleCI from killing
