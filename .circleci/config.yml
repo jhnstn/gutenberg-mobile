@@ -278,7 +278,17 @@ jobs:
           # ten minutes.
           no_output_timeout: 20m
           environment:
-            NODE_OPTIONS: --max_old_space_size=4096
+            # This build runs on a 4 GB RAM Docker Executor. To avoid running
+            # out of memory, set the max memory size of V8's old memory section
+            # to something less than that "to leave memory for other uses and
+            # avoid swapping".
+            #
+            # See:
+            #
+            # - https://nodejs.org/api/cli.html#cli_max_old_space_size_size_in_megabytes
+            # - https://support.circleci.com/hc/en-us/articles/360009208393-How-can-I-increase-the-max-memory-for-Node-
+            # - Build failure example: https://app.circleci.com/pipelines/github/wordpress-mobile/gutenberg-mobile/10079/workflows/f11af227-783c-4304-a4bf-25f36a831ea9/jobs/53256
+            NODE_OPTIONS: --max_old_space_size=3072
       # Move the generated bundle to the location where we'll need it for the
       # Gradle build, then put it in the CI cache. We'll get it from there in
       # the publishing job, which runs on a Docker container optimized for
