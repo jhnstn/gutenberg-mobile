@@ -264,6 +264,10 @@ jobs:
       - run:
           name: Build Js Bundle
           command: npm run bundle:android
+          # This command may take a long time, so prevent CircleCI from killing
+          # the build if it doesn't receive output for more than its default
+          # ten minutes.
+          no_output_timeout: 20m
           environment:
             NODE_OPTIONS: --max_old_space_size=4096
       # Move the generated bundle to the location where we'll need it for the
