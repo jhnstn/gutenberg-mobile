@@ -263,7 +263,16 @@ jobs:
       - npm-install
       - run:
           name: Build Js Bundle
-          command: npm run bundle:android
+          command: |
+            # Try to save memory when building the bundles by using only one
+            # worker.
+            #
+            # See:
+            #
+            # - https://app.circleci.com/pipelines/github/wordpress-mobile/gutenberg-mobile/10073/workflows/b8eb0104-c426-4208-b077-00caac394a62/jobs/53247
+            echo "module.exports = { maxWorkers: 2 };" > gutenberg/packages/react-native-bridge/metro.config.js
+
+            npm run bundle:android
           # This command may take a long time, so prevent CircleCI from killing
           # the build if it doesn't receive output for more than its default
           # ten minutes.
