@@ -424,14 +424,6 @@ workflows:
           requires: [ "Optional UI Tests" ]
       - android-native-unit-tests:
           name: Android Native Unit Tests
-      - android-build-react-native-bridge:
-          name: Build Android RN Bridge Js Bundle
-          # Note worthy: using android-native-unit-tests doesn't work, the
-          # "name" key value needs to be used.
-          requires: [ "Android Native Unit Tests" ]
-      - android-publish-react-native-bridge:
-          name: Publish Android RN Bridge Js Bundle to Bintray
-          requires: [ "Build Android RN Bridge Js Bundle" ]
       - ios-device-checks:
           name: Test iOS on Device - Full (Submodule Update)
           post-to-slack: true
@@ -444,6 +436,19 @@ workflows:
           filters:
             branches:
               only: /^dependabot/submodules/.*/
+      # Publishing to Bintray is time consuming; let's do it manually for now
+      # while we figure out a way to add intelligence in the pipeline to only
+      # trigger it when there are changes that require it.
+      - Publish Android React Native Bride to Bintray:
+          type: approval
+      - android-build-react-native-bridge:
+          name: Build Android RN Bridge Js Bundle
+          # Note worthy: using android-native-unit-tests doesn't work, the
+          # "name" key value needs to be used.
+          requires: [ "Publish Android React Native Bride to Bintray" ]
+      - android-publish-react-native-bridge:
+          name: Publish Android RN Bridge Js Bundle to Bintray
+          requires: [ "Build Android RN Bridge Js Bundle" ]
 
   ui-tests-full-scheduled:
     jobs:
