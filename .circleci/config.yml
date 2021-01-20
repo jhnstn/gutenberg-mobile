@@ -441,6 +441,7 @@ workflows:
       # trigger it when there are changes that require it.
       - Publish Android React Native Bride to Bintray:
           type: approval
+          requires: [ "Android Native Unit Tests" ]
       - android-build-react-native-bridge:
           name: Build Android RN Bridge Js Bundle
           # Note worthy: using android-native-unit-tests doesn't work, the
