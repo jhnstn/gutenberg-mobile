@@ -354,40 +354,7 @@ jobs:
               PREFIX="$CIRCLE_SHA1-ci-test"
             fi
 
-            # Because we have Gradle's configure-on-demand option set to true,
-            # simply calling `bintrayUpload` won't generate the AAR and POM;
-            # we need to explicitly do it here.
-            #
-            # See
-            # https://github.com/wordpress-mobile/circleci-orbs/blob/82f9821130890756e85277486ca0dde6cae25431/src/android/orb.yml#L19),
-            #
-            # - `assembleRelease` builds the AAR
-            # - `generatePomFileForGutenbergMobilePublicationPublication` builds the POM
-            # - `bintrayUpload` uploads both, using the version value set via
-            #   `-PbintrayVersion`
-            #
-            # Worth noting that the Bintray plugin mentions the necessity for
-            # some workarounds to generate the POM under certain circumstances,
-            # although none of them apply to our current usage.
-            #
-            # See:
-            # https://github.com/bintray/gradle-bintray-plugin/tree/67718c3a65b64dbfe7534a82a178da2c57153a5d#maven-publications
-            #
-            # See also the description and comments in this PR:
-            # https://github.com/wordpress-mobile/WordPress-Utils-Android/pull/39
-            #
-            # Calling `assembleRelease` in the same `./gradlew` invocation as
-            # the other tasks results in the AAR not being found, so we'll call
-            # that alone first.
-            #
-            # See:
-            # https://app.circleci.com/pipelines/github/wordpress-mobile/WordPress-Utils-Android/165/workflows/b0cb954f-315d-4c54-99a7-c36d11eec5c8/jobs/342
-            ./gradlew assembleRelease
-
-            ./gradlew \
-              generatePomFileForGutenbergMobilePublicationPublication \
-              bintrayUpload \
-              -PbintrayVersion=$PREFIX
+            ./gradlew bintrayUpload -PbintrayVersion=$PREFIX
 
 workflows:
   gutenberg-mobile:
